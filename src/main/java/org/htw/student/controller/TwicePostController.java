@@ -2,28 +2,36 @@ package org.htw.student.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.htw.student.models.Once;
+import org.htw.student.models.TwiceComment;
 import org.htw.student.models.TwicePost;
 import org.htw.student.repository.OnceRepository;
+import org.htw.student.repository.TwiceCommentRepository;
 import org.htw.student.repository.TwicePostRepository;
 import org.htw.student.structs.TwicePostCreationStruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/twice-post")
 public class TwicePostController {
+    private static final Logger log = LoggerFactory.getLogger(TwicePostController.class);
     @Autowired
     TwicePostRepository twicePostRepository;
+
     OnceRepository onceRepository;
     TwiceUploadController twiceUploadController;
+    @Autowired
+    private TwiceCommentRepository twiceCommentRepository;
 
     @PostMapping
     public ResponseEntity<?> createTwicePost(@RequestPart("body") TwicePostCreationStruct body,
@@ -115,5 +123,58 @@ public class TwicePostController {
 
         twicePostRepository.deleteById(onceId);
         return ResponseEntity.ok("Deleted post");
+    }
+
+    @PostMapping("/post/{onceId}/upvote")
+    public ResponseEntity<Object> upvoteTwicePost(@PathVariable String onceId, HttpSession session) {
+        Once once = (Once) session.getAttribute("oncie");
+
+        Optional<TwicePost> twicePostOptional = twicePostRepository.findById(onceId);
+        if (twicePostOptional.isEmpty()) return ResponseEntity.notFound().build();
+
+        TwicePost post = twicePostOptional.get();
+        if (!post.getUpvotedBy().contains(once.getId())) {
+            post.getUpvotedBy().add(once.getId());
+            twicePostRepository.save(post);
+        }
+
+        return ResponseEntity.ok("Upvoted post");
+    }
+
+    @PostMapping("/post/{onceId}/comment")
+    public ResponseEntity<Object> addTwiceComment(@PathVariable String onceId, @RequestBody Map<String, String> body, HttpSession session) {
+        Once once = (Once) session.getAttribute("oncie");
+        if (once == null) {
+            log.error("User not signed in");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not signed in");
+        }
+        log.info("User logging in: {}", once);
+        Optional<TwicePost> postOptional = twicePostRepository.findById(onceId);
+        if (postOptional.isEmpty()) return ResponseEntity.notFound().build();
+
+        TwicePost twicePost = postOptional.get();
+        TwiceComment twiceComment = new TwiceComment();
+        twiceComment.setPost(twicePost);
+        twiceComment.setOnce(once);
+        twiceComment.setContent(body.get("content"));
+        twiceCommentRepository.save(twiceComment);
+        return ResponseEntity.ok("Comment added");
+    }
+
+    @PostMapping("/comment/{commentId}/upvote")
+    public ResponseEntity<Object> upvoteComment(@PathVariable String commentId, HttpSession session) {
+        Once once = (Once) session.getAttribute("oncie");
+        if (once == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not signed in");
+
+        Optional<TwiceComment> commentOptional = twiceCommentRepository.findById(commentId);
+        if (commentOptional.isEmpty()) return ResponseEntity.notFound().build();
+
+        TwiceComment comment = commentOptional.get();
+        if (!comment.getUpvotedBy().contains(once.getId())) {
+            comment.getUpvotedBy().add(once.getId());
+            twiceCommentRepository.save(comment);
+        }
+
+        return ResponseEntity.ok("Upvoted comment");
     }
 }
