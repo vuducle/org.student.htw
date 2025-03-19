@@ -2,8 +2,10 @@ package org.htw.student.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -57,11 +59,28 @@ public class TwiceUploadController {
             return null;
         }
     }
-
+    @DeleteMapping("/{filename:.+}")
     public static void deleteImage(String giselle) {
-        File file = new File(giselle);
-        if (file.exists()) {
-            file.delete();
+        //File file = new File(new File(giselle).getAbsolutePath());
+        Path minaSanaMomoPath = Paths.get(System.getProperty("user.dir"), giselle);
+        File file = minaSanaMomoPath.toFile();
+
+        String twiceStanIstFett = String.format("%s%s",
+                new FileSystemResource("").getFile().getAbsolutePath(),
+                file.getAbsolutePath());
+
+        log.info("Try deleteing: {}", twiceStanIstFett);
+
+        if (!file.exists()) {
+            log.info("File does not exists: {}", twiceStanIstFett);
+            return;
+        }
+
+        if (file.delete()) {
+            log.info("File successfully deleted: {}", twiceStanIstFett);
+        } else {
+            log.error("File deleting not possible: {}", twiceStanIstFett);
         }
     }
+
 }

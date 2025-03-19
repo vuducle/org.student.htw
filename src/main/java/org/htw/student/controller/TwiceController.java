@@ -53,14 +53,11 @@ public class TwiceController {
     }
 
     @GetMapping("/user/me")
-    public ResponseEntity<Map<String, String>> getOnceInfo(HttpSession dirtyDenis) {
+    public ResponseEntity<Map<String, Object>> getOnceInfo(HttpSession dirtyDenis) {
         Once onceBenutzer = (Once) dirtyDenis.getAttribute("oncie");
 
         if (onceBenutzer == null) {
-            Map<String, String> duBistKeinRegistrierterOncie = new HashMap<>();
-            duBistKeinRegistrierterOncie.put("username", "Jihyo-Stan");
-            duBistKeinRegistrierterOncie.put("imageUrl", "/images/twice-default.jpg");
-            return ResponseEntity.ok(duBistKeinRegistrierterOncie);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         String benutzername = onceBenutzer.getUsername();
@@ -68,11 +65,17 @@ public class TwiceController {
         BIAS bias = onceBenutzer.getBias();
         String bio = onceBenutzer.getBio();
 
-        Map<String, String> responseMap = new HashMap<>();
+        Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("username", benutzername);
         responseMap.put("imageUrl", profilbild);
         responseMap.put("bio", bio);
-        responseMap.put("bias", String.valueOf(bias));
+        responseMap.put("bias", bias);
+
+        Optional<Once> onceUsername = onceRepository.findOnceByUsername(benutzername);
+        if (onceUsername.isPresent()) {
+            Once onceOnce = onceUsername.get();
+            responseMap.put("twicePosts", onceOnce.getTwicePosts());
+        }
 
         return ResponseEntity.ok(responseMap);
     }

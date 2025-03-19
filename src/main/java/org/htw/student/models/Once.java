@@ -1,5 +1,6 @@
 package org.htw.student.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Generated;
 import lombok.Getter;
@@ -29,5 +30,6 @@ public class Once {
     @Enumerated
     private ALBUMS albums;
     @OneToMany(mappedBy = "once", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<TwicePost> twicePosts = new ArrayList<>();
 }

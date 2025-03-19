@@ -9,6 +9,7 @@ import org.htw.student.structs.TwicePostCreationStruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +27,8 @@ public class TwicePostController {
 
     @PostMapping
     public ResponseEntity<?> createTwicePost(@RequestPart("body") TwicePostCreationStruct body,
-                                                     @RequestPart(value = "twiceFile", required = false) MultipartFile[] twiceFile,
-                                                     HttpSession authentificated) {
+                                             @RequestPart(value = "twiceFile", required = false) MultipartFile[] twiceFile,
+                                             HttpSession authentificated) {
         // Wenn Once eingeloggt ist
         Once username = (Once) authentificated.getAttribute("oncie");
         //Optional<Once> once =  onceRepository.findOnceByAuthentificated(username);
@@ -53,6 +54,7 @@ public class TwicePostController {
                     String path = TwiceUploadController.storeImageFile(juliaNguyen);
                     if (path != null) {
                         asianGirls.add(path);
+                        if (asianGirls.size() > 5) return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("Zu viele Dateien");
                     }
                 }
             }
@@ -76,14 +78,20 @@ public class TwicePostController {
         return ResponseEntity.ok(twicePostRepository.findAll());
     }
 
-    @GetMapping("/{onceId}")
-    public ResponseEntity<List<TwicePost>> getOncePost(@PathVariable String onceId) {
-        return ResponseEntity.ok(twicePostRepository.findTwicePostById(onceId));
+    @GetMapping("/post/{onceId}")
+    public ResponseEntity<?> getTwicePost(@PathVariable String onceId) {
+        Optional<TwicePost> post = twicePostRepository.findById(onceId);
+
+        if (post.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.ok(post.get());
     }
 
-    @DeleteMapping("/{onceId}")
+    @DeleteMapping("/post/{onceId}")
     public ResponseEntity<?> deletePost(@PathVariable String onceId, HttpSession session) {
-        String username = (String) session.getAttribute("oncie");
+        Once username = (Once) session.getAttribute("oncie");
 
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not sign up");
@@ -95,7 +103,7 @@ public class TwicePostController {
         }
 
         TwicePost post = postOptional.get();
-        if (!post.getOnce().getUsername().equals(username)) {
+        if (!post.getOnce().getUsername().equals(username.getUsername())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized");
         }
 
