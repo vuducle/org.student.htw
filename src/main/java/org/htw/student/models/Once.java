@@ -1,6 +1,8 @@
 package org.htw.student.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Generated;
@@ -13,6 +15,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Once {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,7 +34,8 @@ public class Once {
     @Enumerated
     private ALBUMS albums;
     @OneToMany(mappedBy = "once", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+
     @JsonManagedReference
+    @JsonIgnore
     private List<TwicePost> twicePosts = new ArrayList<>();
 }

@@ -41,7 +41,7 @@ public class TwicePost {
     @Column(name = "once_id_value")
     private String onceId;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<TwiceComment> comments = new ArrayList<>();
 

@@ -4,10 +4,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.htw.student.dto.OnceDTO;
 import org.htw.student.dto.OnceSessionDTO;
 import org.htw.student.models.BIAS;
 import org.htw.student.models.Once;
 import org.htw.student.repository.OnceRepository;
+import org.htw.student.service.OnceService;
 import org.htw.student.structs.OnceCreationProfileStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,23 +36,37 @@ public class TwiceController {
     private static Logger log = LoggerFactory.getLogger(TwiceController.class);
     @Autowired
     OnceRepository onceRepository;
+    private final OnceService onceService;
 
-    @GetMapping
+    @Autowired
+    public TwiceController(OnceService onceService) {
+        this.onceService = onceService;
+    }
+    /*@GetMapping
     public ResponseEntity<String> getTwice(@RequestParam(value = "album", required = false) String album) {
         if (album != null && album.equals("FANCE")) return ResponseEntity.ok("TWICESTAN IST FETT");
         return ResponseEntity.ok("once");
-    }
+    }*/
 
     @GetMapping("/{username}")
-    public ResponseEntity<Once> getOnceByUsername(@PathVariable String username) {
+    public ResponseEntity<OnceDTO> getOnceByUsername(@PathVariable String username) {
         Optional<Once> once = onceRepository.findOnceByUsername(username);
 
         if (once.isPresent()) {
             Once onceOnce = once.get();
             onceOnce.setHashPassword(null);
-            return ResponseEntity.ok(onceOnce);
+            return ResponseEntity.ok(new OnceDTO(onceOnce));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Once>> searchOncies(@RequestParam(value = "search", required = false) String search, String album) {
+        //if (album != null && album.equals("FANCE")) return ResponseEntity.ok();
+
+        List<Once> oncies = onceService.searchOnce(search);
+
+        return ResponseEntity.ok(oncies);
     }
 
     @GetMapping("/user/me")

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 public interface TwicePostRepository extends JpaRepository<TwicePost, String> {
     List<TwicePost> findTwicePostById(String id);
     List<TwicePost> findByMemberName(String memberName);

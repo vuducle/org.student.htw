@@ -1,6 +1,7 @@
 package org.htw.student.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,7 +26,11 @@ public class TwiceComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "once_id", nullable = false)
+
     private Once once;
+
+    private String onceUsername;
+    private String onceProfileImageUrl;
 
     private String content;
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -42,4 +47,12 @@ public class TwiceComment {
     @ElementCollection
     private List<String> upvotedBy = new ArrayList<>();
 
+    @PrePersist
+    @PreUpdate
+    public void populateOnceDetails() {
+        if (once != null) {
+            this.onceUsername = once.getUsername();
+            this.onceProfileImageUrl = once.getImageUrl();
+        }
+    }
 }
