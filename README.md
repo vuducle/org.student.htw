@@ -1,13 +1,13 @@
 # OnceVerse 🎀💖
-*A dedicated social platform for TWICE fans (ONCEs) built with Spring Boot*
-
+*A dedicated social platform for TWICE fans (ONCEs) built with Spring Boot.*
+![OnceVerse Banner](/screenshot.jpg)
 ## Table of Contents
 - [Concept](#-concept)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Installation](#-installation)
-- [API Endpoints](#-api-endpoints)
-- [Roadmap](#-roadmap)
+- [API Endpoints](#api-endpoints)
+- [Roadmap](#roadmap)
 
 ## 🌟 Concept
 OnceVerse is a specialized social media platform where ONCEs can:
@@ -38,6 +38,15 @@ OnceVerse is a specialized social media platform where ONCEs can:
 - Spring Security
 - Spring Data JPA
 - WebSocket (Future implementation)
+
+**Frontend:**
+
+The Sourcecode is located [here](https://github.com/vuducle/twice-nextjs    )
+
+- Next.js (TypeScript)
+- TailwindCSS (Daisy.UI)
+- Axios
+- Socket.io (Future implementation)
 
 
 **Database:**
