@@ -7,10 +7,7 @@
 - [Tech Stack](#-tech-stack)
 - [Installation](#-installation)
 - [API Endpoints](#-api-endpoints)
-- [Database Schema](#-database-schema)
 - [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
 
 ## 🌟 Concept
 OnceVerse is a specialized social media platform where ONCEs can:
